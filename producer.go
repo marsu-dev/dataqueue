@@ -3,6 +3,7 @@ package dataqueue
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -12,6 +13,7 @@ type DataProducer struct {
 	count        int
 	producerFunc ProducerFunc
 	wg           sync.WaitGroup
+	stopingAll   uint64
 	stopAll      context.CancelFunc
 }
 
@@ -67,8 +69,15 @@ func (p *DataProducer) produce(ctx context.Context, id int) {
 		for {
 			select {
 			case <-time.After(0 * time.Millisecond):
+				if p.stopingAll > 0 {
+					break
+				}
 
 				item, action := p.producerFunc(ctx)
+
+				if action.IsStopAll() {
+					atomic.StoreUint64(&p.stopingAll, 1)
+				}
 				if action.IsSend() {
 					if item != nil {
 						ch <- item
