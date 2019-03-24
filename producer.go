@@ -83,6 +83,9 @@ func (p *DataProducer) produce(ctx context.Context, id int) {
 						ch <- item
 					}
 				}
+				if action.IsNoop() {
+					break
+				}
 				if action.IsStop() {
 					quit <- struct{}{}
 					return

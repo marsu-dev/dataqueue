@@ -2,6 +2,7 @@ package dataqueue
 
 // Actions bit flag enum
 const (
+	ActionNoop    Action = 0
 	ActionSend    Action = 1 << 1
 	ActionStop    Action = 1 << 2
 	ActionStopAll Action = 1 << 3
@@ -9,6 +10,11 @@ const (
 	ActionSendAndStop    Action = ActionSend | ActionStop
 	ActionSendAndStopAll Action = ActionSend | ActionStopAll
 )
+
+// IsNoop return if no action is required
+func (action Action) IsNoop() bool {
+	return action == ActionNoop
+}
 
 // IsSend return if action is to send
 func (action Action) IsSend() bool {
